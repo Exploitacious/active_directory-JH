@@ -1,0 +1,4 @@
+PostalCode,PhoneAreaCode
+06074,208
+32806,513
+60185,660
