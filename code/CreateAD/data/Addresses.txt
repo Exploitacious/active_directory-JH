@@ -1,0 +1,4 @@
+City,Street,State,PostalCode,Country
+South Windsor,70 Bowman Street,CT,06074,US
+Orlando,514 South Magnolia Street,FL,32806,US
+Chicago,44 Shirley Avenue,IL,60185,US
