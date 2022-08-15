@@ -23,6 +23,8 @@ Push-Location (Split-Path ($MyInvocation.MyCommand.Path))
 #
 # User properties
 
+$path:Global = "$PSScriptRoot\data\"
+
 $ou = "OU=People,DC=lab,DC=com"        # Which OU to create the users in
 $orgShortName = "XYZ"                  # This is used to build a user's sAMAccountName
 $dnsDomain = "XYZ.local"                 # Domain is used for e-mail address and UPN
@@ -42,15 +44,15 @@ $departments = (                       # Departments and associated job titles t
 $phoneCountryCodes = @{"US" = "1"}         # Country codes for the countries used in the address file
 
 # Other parameters
-$userCount = 12362                           # How many users to create
+$userCount = 2                           # How many users to create
 $locationCount = 3                          # How many different offices locations to use
 
 # Files used
-$firstNameFile = "Firstnames.txt"            # Format: FirstName
-$lastNameFile = "Lastnames.txt"              # Format: LastName
-$addressFile = "Addresses.txt"               # Format: City,Street,State,PostalCode,Country
-$postalAreaFile = "PostalAreaCode.txt"       # Format: PostalCode,PhoneAreaCode
-$passwordsFile = "Passwords.txt"
+$firstNameFile = "$Path\Firstnames.txt"            # Format: FirstName
+$lastNameFile = "$Path\Lastnames.txt"              # Format: LastName
+$addressFile = "$Path\Addresses.txt"               # Format: City,Street,State,PostalCode,Country
+$postalAreaFile = "$Path\PostalAreaCode.txt"       # Format: PostalCode,PhoneAreaCode
+$passwordsFile = "$Path\Passwords.txt"
 $employeeNumber = 0
 
 #

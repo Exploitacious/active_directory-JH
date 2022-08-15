@@ -1,4 +1,3 @@
-Firstname
 michael
 john
 david
