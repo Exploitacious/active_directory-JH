@@ -1,7 +1,0 @@
-
-
-$OUGroups = Get-ADOrganizationalUnit -Filter *
-
-
-
-

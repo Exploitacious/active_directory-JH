@@ -26,6 +26,7 @@ if ( $GroupCount -eq 0 ) {
     $GroupCount = 1
 }
 
+
 if ( $LocalAdminCount -ne 0) {
     $local_admin_indexes = @()
     while (($local_admin_indexes | Measure-Object ).Count -lt $LocalAdminCount) {
@@ -66,8 +67,9 @@ for ( $i = 1; $i -le $UserCount; $i++ ) {
     $passwords.Remove($password)
 }
 
+# Static Domain Params
 ConvertTo-Json -InputObject @{ 
-    "domain" = "xyz.com"
+    "domain" = "xyz.local"
     "groups" = $groups
     "users"  = $users
 } | Out-File $path\ad_schema.json
