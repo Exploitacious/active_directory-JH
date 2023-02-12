@@ -34,12 +34,12 @@ $departments = (                       # Departments and associated job titles t
 	@{"Name" = "Human Resources"; Positions = ("Manager", "Administrator", "Officer", "Coordinator") },
 	@{"Name" = "Sales"; Positions = ("Manager", "Representative", "Consultant") },
 	@{"Name" = "Marketing"; Positions = ("Manager", "Coordinator", "Assistant", "Specialist") },
-	@{"Name" = "Engineering"; Positions = ("Manager", "Engineer", "Scientist") },
-	@{"Name" = "Consulting"; Positions = ("Manager", "Consultant") },
-	@{"Name" = "IT"; Positions = ("Manager", "Engineer", "Technician") },
-	@{"Name" = "Planning"; Positions = ("Manager", "Engineer") },
-	@{"Name" = "Contracts"; Positions = ("Manager", "Coordinator", "Clerk") },
-	@{"Name" = "Purchasing"; Positions = ("Manager", "Coordinator", "Clerk", "Purchaser") }
+	@{"Name" = "Engineering"; Positions = ("Manager", "Engineer", "Scientist", "Researcher") },
+	@{"Name" = "Customer Relations"; Positions = ("Manager", "Account Manager", "Representative") },
+	@{"Name" = "Information Technology"; Positions = ("Manager", "Engineer", "Helpdesk") },
+	@{"Name" = "Quality Assurance"; Positions = ("Manager", "Product Tester") },
+	@{"Name" = "Researcher"; Positions = ("Manager", "Coordinator", "Researcher") },
+	@{"Name" = "Developer"; Positions = ("Manager", "Developer", "Reviewer") }
 )
 $phoneCountryCodes = @{"US" = "1" }         # Country codes for the countries used in the address file
 
@@ -53,6 +53,7 @@ $lastNameFile = "$Path\Lastnames.txt"              # Format: LastName
 $addressFile = "$Path\Addresses.txt"               # Format: City,Street,State,PostalCode,Country
 $postalAreaFile = "$Path\PostalAreaCode.txt"       # Format: PostalCode,PhoneAreaCode
 $passwordsFile = "$Path\Passwords.txt"
+$GroupsFile = "$Path\Groupnames.txt"
 $employeeNumber = (Get-ADUser -Filter *).Count + 1
 
 #
@@ -70,6 +71,9 @@ $postalAreaCodesTemp = Import-Csv $postalAreaFile
 "[+] Loaded postal codes file."
 $passwords = gc $passwordsFile
 "[+] Loaded password file."
+$GroupNames = gc $GroupsFile
+"[+] Loaded Groups file."
+Write-Host
 
 
 # Convert the postal & phone area code object list into a hash
@@ -108,6 +112,12 @@ for ($i = 1; $i -le $locationCount; $i++) {
 $locations
 "[+] Addresses prepared."
 Read-Host -Prompt "Press Any key."
+
+# Create the Groups
+foreach ($group in $GroupNames) {
+	Write-Host "Creating $group Group"
+	Try { New-ADGroup -Name $group -Path $OU -GroupScope Global } Catch {}
+}
 
 #
 # Create the users

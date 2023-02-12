@@ -12,3 +12,8 @@ Accounting
 Sales
 Developer
 Researcher
+Customer Relations
+Executives
+Administration
+Engineering
+Marketing
