@@ -1,12 +1,16 @@
 #Base Lists 
-$Global:HighGroups = @('Management', 'Information Technology', 'Executive');
-$Global:MidGroups = @('Human Resources', 'Accounting', 'Administration');
+$Global:HighGroups = @('Information Technology', 'Executives', 'Human Resources');
+$Global:MidGroups = @('Accounting', 'Administration', 'Management');
 $Global:NormalGroups = @('Engineering', 'Developer', 'Quality Assurance', 'Researcher', 'Marketing', 'Sales', 'Customer Relations');
 $Global:BadACL = @('GenericAll', 'GenericWrite', 'WriteOwner', 'WriteDACL', 'Self', 'WriteProperty');
 $Global:ServicesAccountsAndSPNs = @('mssql_svc,mssqlserver', 'http_svc,httpserver', 'exchange_svc,exserver');
-$CreatedUsers = @(Get-ADUser -Filter *)
-$AllObjects = @(Get-ADGroup -Filter *)
-$Global:Domain = "xyz.local";
+$Global:CreatedUsers = @(Get-ADUser -Filter *)
+$Global:AllObjects = @(Get-ADGroup -Filter *)
+$Global:Domain = "xyz.local"
+$DataPath = "$PSScriptRoot\data\"
+$passwordsFile = "$DataPath\Passwords.txt"
+$passwords = gc $passwordsFile
+
 
 # Strings 
 $Global:Spacing = "`t"
@@ -35,7 +39,6 @@ function VulnAD-GetRandom {
     )
     return Get-Random -InputObject $InputList
 }
-
 function VulnAD-AddACL {
     [CmdletBinding()]
     param(
@@ -98,7 +101,7 @@ function VulnAD-Kerberoasting {
     $selected_service = (VulnAD-GetRandom -InputList $Global:ServicesAccountsAndSPNs)
     $svc = $selected_service.split(',')[0];
     $spn = $selected_service.split(',')[1];
-    $password = VulnAD-GetRandom -InputList $Global:BadPasswords;
+    $Password = Get-Random $passwords;
     Write-Info "Kerberoasting $svc $spn"
     Try { New-ADServiceAccount -Name $svc -ServicePrincipalNames "$svc/$spn.$Global:Domain" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -RestrictToSingleComputer -PassThru } Catch {}
     foreach ($sv in $Global:ServicesAccountsAndSPNs) {
@@ -106,7 +109,7 @@ function VulnAD-Kerberoasting {
             $svc = $sv.split(',')[0];
             $spn = $sv.split(',')[1];
             Write-Info "Creating $svc services account"
-            $password = ([System.Web.Security.Membership]::GeneratePassword(12, 2))
+            $password = Get-Random $passwords
             Try { New-ADServiceAccount -Name $svc -ServicePrincipalNames "$svc/$spn.$Global:Domain" -RestrictToSingleComputer -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru } Catch {}
 
         }
@@ -115,7 +118,7 @@ function VulnAD-Kerberoasting {
 function VulnAD-ASREPRoasting {
     for ($i = 1; $i -le (Get-Random -Maximum 6); $i = $i + 1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
-        $password = VulnAD-GetRandom -InputList $Global:BadPasswords;
+        $Password = Get-Random $passwords;
         Set-ADAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $password -AsPlainText -Force)
         Set-ADAccountControl -Identity $randomuser -DoesNotRequirePreAuth 1
         Write-Info "AS-REPRoasting $randomuser"
@@ -134,7 +137,7 @@ function VulnAD-DnsAdmins {
 function VulnAD-PwdInObjectDescription {
     for ($i = 1; $i -le (Get-Random -Maximum 6); $i = $i + 1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
-        $password = ([System.Web.Security.Membership]::GeneratePassword(12, 2))
+        $password = Get-Random $passwords
         Set-ADAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $password -AsPlainText -Force)
         Set-ADUser $randomuser -Description "User Password $password"
         Write-Info "Password in Description : $randomuser"
@@ -161,7 +164,7 @@ function VulnAD-PasswordSpraying {
 }
 function VulnAD-DCSync {
     for ($i = 1; $i -le (Get-Random -Maximum 6); $i = $i + 1 ) {
-        $ADObject = [ADSI]("LDAP://" + (Get-ADDomain $Global:Domain).DistinguishedName)
+        $ADObject = [ADSI]("LDAP://" + (Get-ADDomain "XYZ.local").DistinguishedName)
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         $sid = (Get-ADUser -Identity $randomuser).sid
 
@@ -185,24 +188,29 @@ function VulnAD-DCSync {
 function VulnAD-DisableSMBSigning {
     Set-SmbClientConfiguration -RequireSecuritySignature 0 -EnableSecuritySignature 0 -Confirm -Force
 }
+
+
+
+
+
 ShowBanner
 $Global:Domain = $DomainName
 
 VulnAD-BadAcls
-# Write-Good "BadACL Done"
-# VulnAD-Kerberoasting
-# Write-Good "Kerberoasting Done"
-# VulnAD-ASREPRoasting
-# Write-Good "AS-REPRoasting Done"
-# VulnAD-DnsAdmins
-# Write-Good "DnsAdmins Done"
-# VulnAD-PwdInObjectDescription
-# Write-Good "Password In Object Description Done"
-# VulnAD-DefaultPassword
-# Write-Good "Default Password Done"
-# VulnAD-PasswordSpraying
-# Write-Good "Password Spraying Done"
-# VulnAD-DCSync
-# Write-Good "DCSync Done"
+Write-Good "BadACL Done"
+VulnAD-Kerberoasting
+Write-Good "Kerberoasting Done"
+VulnAD-ASREPRoasting
+Write-Good "AS-REPRoasting Done"
+VulnAD-DnsAdmins
+Write-Good "DnsAdmins Done"
+VulnAD-PwdInObjectDescription
+Write-Good "Password In Object Description Done"
+VulnAD-DefaultPassword
+Write-Good "Default Password Done"
+VulnAD-PasswordSpraying
+Write-Good "Password Spraying Done"
+VulnAD-DCSync
+Write-Good "DCSync Done"
 # VulnAD-DisableSMBSigning
 # Write-Good "SMB Signing Disabled"
