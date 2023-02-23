@@ -11,3 +11,9 @@ answer = today - year_guess
 
 # Return result
 print(f'You are {answer} years old!')
+
+
+if (today == answer):
+    print("fuck you")
+else:
+    print("fuck you too")
