@@ -18,4 +18,8 @@ entered_Pass = str(input("\n Please enter your password\n"))
 
 # Check the password against the real one, return result True or False
 correct_Pass = (existing_Pass == entered_Pass)
-print(correct_Pass)
+
+if (correct_Pass == True):
+    print("Correct!")
+else:
+    print("Incorrect, please try again.")
